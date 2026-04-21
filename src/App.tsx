@@ -24,6 +24,7 @@ export default function App() {
             <Route path="login" element={<LoginPage />} />
             <Route path="perfil" element={<ProfilePage />} />
             <Route path="painel-admin" element={<AdminPage />} />
+            <Route path="callback" element={<DiscordCallback />} />
             <Route path="auth/discord/callback" element={<DiscordCallback />} />
           </Route>
         </Routes>

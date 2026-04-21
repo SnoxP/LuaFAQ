@@ -305,12 +305,17 @@ export const FaqProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const login = async () => {
+    // Se der erro de redirect uri, vamos forçar o endereço direto da Vercel
     const clientId = (import.meta as any).env.VITE_DISCORD_CLIENT_ID;
     if (!clientId) {
-      alert("Erro: VITE_DISCORD_CLIENT_ID não está configurado nas variáveis de ambiente da Vercel.");
+      alert("Erro: VITE_DISCORD_CLIENT_ID não está configurado. Verifique as variáveis de ambiente.");
       return;
     }
-    const redirectUri = encodeURIComponent(`${window.location.origin}/callback`);
+    
+    // Tenta pegar o host atual (Vercel ou localhost), mas se falhar cai pro site exato
+    const currentOrigin = window.location.origin || 'https://lua-faq.vercel.app';
+    const redirectUri = encodeURIComponent(`${currentOrigin}/callback`);
+    
     const url = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=identify%20email`;
     window.location.href = url;
   };
