@@ -286,12 +286,7 @@ export default function AdminPage() {
 
   const checkBotStatus = async () => {
     const modelsToCheck = [
-      'gemini-3-flash-preview',
-      'gemini-3.1-flash-lite-preview',
-      'gemini-3.1-pro-preview',
-      'gemini-flash-latest',
-      'groq-llama-3.1-8b-instant',
-      'groq-llama-3.3-70b-versatile'
+      'gemini-3.1-flash-lite-preview'
     ];
     
     const initialStatuses: Record<string, { status: 'checking' | 'online' | 'error', reason?: string }> = {};
@@ -301,12 +296,12 @@ export default function AdminPage() {
     const apiKey = process.env.GEMINI_API_KEY || (import.meta as any).env.VITE_GEMINI_API_KEY;
     if (!apiKey) {
       const errorStatuses: Record<string, { status: 'error', reason: string }> = {};
-      modelsToCheck.filter(m => !m.startsWith('groq-')).forEach(m => errorStatuses[m] = { status: 'error', reason: 'Chave da API não encontrada.' });
+      modelsToCheck.forEach(m => errorStatuses[m] = { status: 'error', reason: 'Chave da API não encontrada.' });
       setBotStatuses(prev => ({ ...prev, ...errorStatuses as any }));
     } else {
       const ai = new GoogleGenAI({ apiKey });
 
-      await Promise.all(modelsToCheck.filter(m => !m.startsWith('groq-')).map(async (modelName) => {
+      await Promise.all(modelsToCheck.map(async (modelName) => {
         try {
           await ai.models.generateContent({
             model: modelName,
@@ -318,55 +313,6 @@ export default function AdminPage() {
           setBotStatuses(prev => ({ ...prev, [modelName]: { status: 'error', reason: err.message || String(err) } }));
         }
       }));
-    }
-
-    // Check Groq
-    const groqApiKey = process.env.GROQ_API_KEY || (import.meta as any).env.VITE_GROQ_API_KEY;
-    if (groqApiKey) {
-      try {
-        await Promise.all(modelsToCheck.filter(m => m.startsWith('groq-')).map(async (modelName) => {
-          try {
-            const groqModel = modelName.replace('groq-', '');
-            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${groqApiKey}`
-              },
-              body: JSON.stringify({
-                messages: [{ role: 'user', content: 'ping' }],
-                model: groqModel,
-                max_tokens: 1
-              })
-            });
-            
-            if (!response.ok) {
-              const errData = await response.json().catch(() => ({}));
-              throw errData;
-            }
-
-            setBotStatuses(prev => ({ ...prev, [modelName]: { status: 'online' } }));
-          } catch (err: any) {
-            let reason = 'Erro desconhecido';
-            if (err.error?.code === 'rate_limit_exceeded') {
-              reason = 'Cota excedida (Limite atingido)';
-            } else if (err.error?.message) {
-              reason = err.error.message;
-            } else if (err.message) {
-              reason = err.message;
-            }
-            setBotStatuses(prev => ({ ...prev, [modelName]: { status: 'error', reason } }));
-          }
-        }));
-      } catch (err) {
-        modelsToCheck.filter(m => m.startsWith('groq-')).forEach(m => {
-          setBotStatuses(prev => ({ ...prev, [m]: { status: 'error', reason: 'Falha ao conectar à API' } }));
-        });
-      }
-    } else {
-      modelsToCheck.filter(m => m.startsWith('groq-')).forEach(m => {
-        setBotStatuses(prev => ({ ...prev, [m]: { status: 'error', reason: 'Chave da API não encontrada.' } }));
-      });
     }
   };
 

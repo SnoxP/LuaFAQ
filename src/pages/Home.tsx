@@ -269,114 +269,42 @@ export default function Home() {
 
       let fullText = '';
 
-      if (selectedModel.startsWith('groq-')) {
-        const apiKey = process.env.GROQ_API_KEY || (import.meta as any).env.VITE_GROQ_API_KEY;
-        if (!apiKey) {
-          throw new Error('Chave da API do Groq não configurada.');
+      const ai = getAI();
+      if (!ai) {
+        throw new Error('Chave da API do Gemini não configurada.');
+      }
+
+      const contents = historyMessages.map(m => {
+        const parts: any[] = [];
+        if (m.text) {
+          parts.push({ text: m.text });
         }
-
-        const groqModel = selectedModel.replace('groq-', '');
-        const groqMessages = historyMessages.map(m => ({
-          role: m.role === 'model' ? 'assistant' : 'user',
-          content: m.text || ''
-        }));
-
-        // Add system instruction
-        groqMessages.unshift({
-          role: 'system',
-          content: systemInstruction
-        });
-
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-          },
-          body: JSON.stringify({
-            messages: groqMessages,
-            model: groqModel,
-            temperature: 0.4,
-            stream: true,
-          })
-        });
-
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.error?.message || `Erro da Groq: ${response.status}`);
+        if (m.image) {
+          parts.push({ inlineData: { data: m.image.data, mimeType: m.image.mimeType } });
         }
-
-        if (!response.body) throw new Error("A resposta não contém um corpo de stream.");
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let done = false;
-
-        while (!done) {
-          const { value, done: readerDone } = await reader.read();
-          done = readerDone;
-          if (value) {
-            const chunkText = decoder.decode(value, { stream: true });
-            const lines = chunkText.split('\n');
-            for (const line of lines) {
-              if (line.startsWith('data: ') && line !== 'data: [DONE]') {
-                const dataStr = line.slice(6);
-                if (dataStr.trim()) {
-                  try {
-                    const parsed = JSON.parse(dataStr);
-                    if (parsed.choices[0]?.delta?.content) {
-                      fullText += parsed.choices[0].delta.content;
-                      setMessages(prev => prev.map(msg => 
-                        msg.id === newModelMsgId ? { ...msg, text: fullText } : msg
-                      ));
-                    }
-                  } catch (e) {
-                    // Ignore JSON parsing errors for partial chunks
-                  }
-                }
-              }
-            }
-          }
+        if (parts.length === 1 && m.image) {
+            parts.unshift({ text: "Analise esta imagem." });
         }
+        return {
+          role: m.role,
+          parts
+        };
+      });
 
-      } else {
-        const ai = getAI();
-        if (!ai) {
-          throw new Error('Chave da API do Gemini não configurada.');
+      const responseStream = await ai.models.generateContentStream({
+        model: selectedModel,
+        contents,
+        config: {
+          systemInstruction,
+          temperature: 0.4,
         }
+      });
 
-        const contents = historyMessages.map(m => {
-          const parts: any[] = [];
-          if (m.text) {
-            parts.push({ text: m.text });
-          }
-          if (m.image) {
-            parts.push({ inlineData: { data: m.image.data, mimeType: m.image.mimeType } });
-          }
-          if (parts.length === 1 && m.image) {
-             parts.unshift({ text: "Analise esta imagem." });
-          }
-          return {
-            role: m.role,
-            parts
-          };
-        });
-
-        const responseStream = await ai.models.generateContentStream({
-          model: selectedModel,
-          contents,
-          config: {
-            systemInstruction,
-            temperature: 0.4,
-          }
-        });
-
-        for await (const chunk of responseStream) {
-          fullText += chunk.text;
-          setMessages(prev => prev.map(msg => 
-            msg.id === newModelMsgId ? { ...msg, text: fullText } : msg
-          ));
-        }
+      for await (const chunk of responseStream) {
+        fullText += chunk.text;
+        setMessages(prev => prev.map(msg => 
+          msg.id === newModelMsgId ? { ...msg, text: fullText } : msg
+        ));
       }
 
       if (!fullText) {
@@ -456,7 +384,10 @@ export default function Home() {
       <div className="flex-1 flex flex-col h-full relative min-w-0">
         <div className="flex-1 overflow-y-auto w-full">
           <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-          {messages.map((msg) => (
+          {messages.map((msg) => {
+            if (msg.role === 'model' && !msg.text && msg.id !== 'welcome') return null;
+            
+            return (
             <div
               key={msg.id}
               className={`flex gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -486,8 +417,9 @@ export default function Home() {
                 </DiscordMarkdown>
               </div>
             </div>
-          ))}
-          {isLoading && (
+            );
+          })}
+          {isLoading && (!messages[messages.length - 1]?.text) && (
             <div className="flex gap-4 justify-start">
               <div className="w-8 h-8 rounded-full bg-black/10 dark:bg-white/10 flex items-center justify-center shrink-0 mt-1">
                 <Bot className="w-5 h-5 text-zinc-700 dark:text-zinc-200" />
