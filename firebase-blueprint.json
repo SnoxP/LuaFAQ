@@ -1,0 +1,69 @@
+{
+  "entities": {
+    "FaqCategory": {
+      "title": "FaqCategory",
+      "description": "A category of FAQ items",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the category"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the category"
+        },
+        "items": {
+          "type": "array",
+          "description": "List of FAQ items in this category",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "question": {
+                "type": "string"
+              },
+              "answer": {
+                "type": "string"
+              }
+            },
+            "required": ["id", "question", "answer"]
+          }
+        }
+      },
+      "required": ["id", "title", "items"]
+    },
+    "User": {
+      "title": "User",
+      "description": "User profile and role information",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "user"]
+        }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/faq/{categoryId}": {
+      "schema": {
+        "$ref": "#/entities/FaqCategory"
+      },
+      "description": "Stores FAQ categories"
+    },
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
+      },
+      "description": "Stores user roles and profiles"
+    }
+  }
+}
