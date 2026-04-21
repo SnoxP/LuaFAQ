@@ -34,7 +34,7 @@ export default function Home() {
   const [isWhyLoginOpen, setIsWhyLoginOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<{ data: string; mimeType: string } | null>(null);
   const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
-  const [selectedModel, setSelectedModel] = useState('gemini-3-flash-preview');
+  const [selectedModel, setSelectedModel] = useState('gemini-3.1-flash-lite-preview');
   const [showUsageTip, setShowUsageTip] = useState(false);
   const [modelStatuses, setModelStatuses] = useState<Record<string, { status: 'checking' | 'online' | 'error' }>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -55,10 +55,7 @@ export default function Home() {
   useEffect(() => {
     const checkModels = async () => {
       const modelsToCheck = [
-        'gemini-3-flash-preview',
         'gemini-3.1-flash-lite-preview',
-        'gemini-3.1-pro-preview',
-        'gemini-flash-latest',
         'groq-llama-3.1-8b-instant',
         'groq-llama-3.3-70b-versatile'
       ];
@@ -595,23 +592,6 @@ export default function Home() {
                             <button
                               type="button"
                               onClick={() => {
-                                setSelectedModel('gemini-3-flash-preview');
-                                setShowAttachmentMenu(false);
-                              }}
-                              className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors ${selectedModel === 'gemini-3-flash-preview' ? 'bg-zinc-100 dark:bg-white/10 text-zinc-900 dark:text-white font-medium' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5'}`}
-                            >
-                              <div className="flex items-center gap-2">
-                                <Cpu className="w-4 h-4" />
-                                <span>3.0 Flash</span>
-                                {modelStatuses['gemini-3-flash-preview']?.status === 'error' && (
-                                  <span title="Erro ao conectar com este modelo">⚠️</span>
-                                )}
-                              </div>
-                              {selectedModel === 'gemini-3-flash-preview' && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
                                 setSelectedModel('gemini-3.1-flash-lite-preview');
                                 setShowAttachmentMenu(false);
                               }}
@@ -625,40 +605,6 @@ export default function Home() {
                                 )}
                               </div>
                               {selectedModel === 'gemini-3.1-flash-lite-preview' && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedModel('gemini-3.1-pro-preview');
-                                setShowAttachmentMenu(false);
-                              }}
-                              className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors ${selectedModel === 'gemini-3.1-pro-preview' ? 'bg-zinc-100 dark:bg-white/10 text-zinc-900 dark:text-white font-medium' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5'}`}
-                            >
-                              <div className="flex items-center gap-2">
-                                <Cpu className="w-4 h-4" />
-                                <span>3.1 Pro</span>
-                                {modelStatuses['gemini-3.1-pro-preview']?.status === 'error' && (
-                                  <span title="Erro ao conectar com este modelo">⚠️</span>
-                                )}
-                              </div>
-                              {selectedModel === 'gemini-3.1-pro-preview' && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedModel('gemini-flash-latest');
-                                setShowAttachmentMenu(false);
-                              }}
-                              className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors ${selectedModel === 'gemini-flash-latest' ? 'bg-zinc-100 dark:bg-white/10 text-zinc-900 dark:text-white font-medium' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5'}`}
-                            >
-                              <div className="flex items-center gap-2">
-                                <Cpu className="w-4 h-4" />
-                                <span>Flash Latest</span>
-                                {modelStatuses['gemini-flash-latest']?.status === 'error' && (
-                                  <span title="Erro ao conectar com este modelo">⚠️</span>
-                                )}
-                              </div>
-                              {selectedModel === 'gemini-flash-latest' && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
                             </button>
                             <button
                               type="button"
