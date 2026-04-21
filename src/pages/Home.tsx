@@ -538,40 +538,6 @@ export default function Home() {
                               </div>
                               {selectedModel === 'gemini-3.1-flash-lite-preview' && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
                             </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedModel('groq-llama-3.1-8b-instant');
-                                setShowAttachmentMenu(false);
-                              }}
-                              className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors ${selectedModel === 'groq-llama-3.1-8b-instant' ? 'bg-zinc-100 dark:bg-white/10 text-zinc-900 dark:text-white font-medium' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5'}`}
-                            >
-                              <div className="flex items-center gap-2">
-                                <Cpu className="w-4 h-4" />
-                                <span>Llama 3.1 8B (Groq)</span>
-                                {modelStatuses['groq-llama-3.1-8b-instant']?.status === 'error' && (
-                                  <span title="Erro ao conectar com este modelo">⚠️</span>
-                                )}
-                              </div>
-                              {selectedModel === 'groq-llama-3.1-8b-instant' && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedModel('groq-llama-3.3-70b-versatile');
-                                setShowAttachmentMenu(false);
-                              }}
-                              className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors ${selectedModel === 'groq-llama-3.3-70b-versatile' ? 'bg-zinc-100 dark:bg-white/10 text-zinc-900 dark:text-white font-medium' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5'}`}
-                            >
-                              <div className="flex items-center gap-2">
-                                <Cpu className="w-4 h-4" />
-                                <span>Llama 3.3 70B (Groq)</span>
-                                {modelStatuses['groq-llama-3.3-70b-versatile']?.status === 'error' && (
-                                  <span title="Erro ao conectar com este modelo">⚠️</span>
-                                )}
-                              </div>
-                              {selectedModel === 'groq-llama-3.3-70b-versatile' && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
-                            </button>
                           </div>
                         </div>
                       </div>
